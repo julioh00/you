@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- ===== EDITABLE: título de la pestaña del navegador ===== -->
+  <title>REGULAR — Ropa urbana</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ===== Ticker superior (edita los textos entre <span>) ===== -->
+  <div class="ticker">
+    <div class="ticker-track" id="tickerTrack">
+      <span>Envío gratis a partir de 60€</span><span class="rosa">▲</span>
+      <span>Nueva colección disponible</span><span class="rosa">▲</span>
+      <span>Devoluciones gratis en 30 días</span><span class="rosa">▲</span>
+      <span>Pago seguro</span><span class="rosa">▲</span>
+    </div>
+  </div>
+
+  <!-- ===== Header: logo + navegación + carrito ===== -->
+  <header>
+    <a href="#" class="logo">
+      <!-- ===== IMAGEN: sustituye assets/img/logo.jpeg por tu logo ===== -->
+      <img src="assets/img/logo.jpeg" alt="REGULAR">
+    </a>
+    <nav>
+      <!-- ===== EDITABLE: enlaces del menú ===== -->
+      <a href="#tienda">Tienda</a>
+      <a href="#sobre">Nosotros</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <button class="carrito-btn" id="abrirCarrito">
+      Carrito <span class="count" id="carritoCount">0</span>
+    </button>
+  </header>
+
+  <!-- ===== Hero: texto principal editable ===== -->
+  <section class="hero">
+    <h1>
+      <!-- ===== EDITABLE: titular de la portada ===== -->
+      Viste<br><span class="rosa">regular</span>
+    </h1>
+    <p>
+      <!-- ===== EDITABLE: descripción corta de la marca ===== -->
+      Ropa urbana diseñada para el día a día. Prendas esenciales,
+      calidades honestas y diseños que no pasan de moda.
+    </p>
+    <a href="#tienda" class="cta">Ver la tienda</a>
+    <!-- Triángulo decorativo: repite el motivo gráfico del logo -->
+    <svg class="triangulo" viewBox="0 0 200 180" aria-hidden="true">
+      <polygon points="100,10 10,170 190,170" fill="#0d0d0d"/>
+      <polygon points="100,55 48,150 152,150" fill="#ff3ea5"/>
+    </svg>
+  </section>
+
+  <!-- ===== Tienda: los productos se cargan desde js/productos.js ===== -->
+  <section id="tienda">
+    <h2 class="section-title">
+      <!-- ===== EDITABLE: título de la sección tienda ===== -->
+      Tienda
+    </h2>
+    <div class="filtros" id="filtros"></div>
+    <div class="productos-grid" id="productosGrid"></div>
+  </section>
+
+  <!-- ===== Sobre nosotros: texto editable ===== -->
+  <section id="sobre" class="sobre">
+    <h2 class="section-title">
+      <!-- ===== EDITABLE: título de la sección ===== -->
+      Sobre nosotros
+    </h2>
+    <p>
+      <!-- ===== EDITABLE: texto sobre la marca ===== -->
+      <span class="rosa">REGULAR</span> nace de la idea de que vestir bien no tiene
+      que ser complicado. Creamos colecciones pequeñas y cuidadas, con tejidos
+      duraderos y cortes pensados para durar. Cada prenda está diseñada para
+      combinarse fácilmente: menos ropa, mejores decisiones.
+    </p>
+  </section>
+
+  <!-- ===== Contacto: datos editables ===== -->
+  <section id="contacto">
+    <h2 class="section-title">
+      <!-- ===== EDITABLE: título de la sección ===== -->
+      Contacto
+    </h2>
+    <div class="contacto-grid">
+      <div>
+        <h3>Email</h3>
+        <!-- ===== EDITABLE: email de contacto ===== -->
+        <a href="mailto:hola@regular.com">hola@regular.com</a>
+      </div>
+      <div>
+        <h3>Teléfono / WhatsApp</h3>
+        <!-- ===== EDITABLE: teléfono de contacto ===== -->
+        <a href="tel:+34600000000">+34 600 000 000</a>
+      </div>
+      <div>
+        <h3>Instagram</h3>
+        <!-- ===== EDITABLE: enlace a Instagram ===== -->
+        <a href="https://instagram.com/regular" target="_blank" rel="noopener">@regular</a>
+      </div>
+      <div>
+        <h3>Horario</h3>
+        <!-- ===== EDITABLE: horario de atención ===== -->
+        <p>Lunes a viernes, 9:00 – 18:00</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer>
+    <div class="logo-mini">REGULAR<span class="rosa">▲</span></div>
+    <!-- ===== EDITABLE: texto legal del pie ===== -->
+    <p>© 2025 REGULAR. Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- ===== Panel del carrito (se abre desde el botón "Carrito") ===== -->
+  <div class="overlay" id="overlay"></div>
+  <aside class="carrito-panel" id="carritoPanel">
+    <div class="cabecera">
+      <h2>Tu carrito</h2>
+      <button class="cerrar" id="cerrarCarrito" aria-label="Cerrar carrito">×</button>
+    </div>
+    <div class="carrito-items" id="carritoItems"></div>
+    <div class="pie">
+      <div class="total">
+        <span>Total</span>
+        <span class="rosa" id="carritoTotal">0,00 €</span>
+      </div>
+      <!-- ===== EDITABLE: al finalizar la compra, enlaza este botón con tu pasarela de pago ===== -->
+      <button class="checkout" id="checkout">Finalizar compra</button>
+    </div>
+  </aside>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="js/productos.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

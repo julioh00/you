@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chat Mistral</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: #f4f4f5;
+      color: #18181b;
+      display: flex;
+      justify-content: center;
+    }
+    .chat {
+      width: 100%;
+      max-width: 720px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 0.75rem;
+    }
+    h1 { font-size: 1.1rem; margin: 0.25rem 0; }
+    .model { font-size: 0.8rem; color: #71717a; margin: 0; }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      background: #fff;
+      border: 1px solid #e4e4e7;
+      border-radius: 0.75rem;
+    }
+    .msg {
+      max-width: 80%;
+      padding: 0.55rem 0.8rem;
+      border-radius: 0.75rem;
+      white-space: pre-wrap;
+      line-height: 1.4;
+      font-size: 0.95rem;
+    }
+    .msg.user { align-self: flex-end; background: #ffd43b; color: #18181b; }
+    .msg.assistant { align-self: flex-start; background: #e4e4e7; }
+    .msg.error { align-self: flex-start; background: #fee2e2; color: #b91c1c; }
+    .msg.pending { align-self: flex-start; background: #e4e4e7; color: #71717a; font-style: italic; }
+    form { display: flex; gap: 0.5rem; }
+    input {
+      flex: 1;
+      padding: 0.65rem 0.8rem;
+      border: 1px solid #d4d4d8;
+      border-radius: 0.75rem;
+      font-size: 0.95rem;
+    }
+    button {
+      padding: 0.65rem 1.1rem;
+      border: none;
+      border-radius: 0.75rem;
+      background: #18181b;
+      color: #fff;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.5; cursor: default; }
+  </style>
+</head>
+<body>
+  <main class="chat">
+    <h1>Chat Mistral</h1>
+    <p class="model">Modèle : mistral-small-latest</p>
+    <div id="messages" class="messages"></div>
+    <form id="form">
+      <input id="input" placeholder="Écrivez votre message…" autocomplete="off" required>
+      <button id="send" type="submit">Envoyer</button>
+    </form>
+  </main>
+  <script>
+    const history = [];
+    const messagesEl = document.getElementById('messages');
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+
+    function addMessage(role, text) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + role;
+      div.textContent = text;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return div;
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      sendBtn.disabled = true;
+      addMessage('user', text);
+      history.push({ role: 'user', content: text });
+      const pending = addMessage('pending', '…');
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: history }),
+        });
+        const data = await res.json();
+        pending.remove();
+        if (!res.ok) throw new Error(data.error || 'Erreur inconnue');
+        addMessage('assistant', data.reply);
+        history.push({ role: 'assistant', content: data.reply });
+      } catch (err) {
+        pending.remove();
+        addMessage('error', err.message);
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    });
+  </script>
+</body>
+</html>

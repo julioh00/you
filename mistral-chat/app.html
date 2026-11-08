@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chat Mistral — archivo único</title>
+  <script type="importmap">
+    {
+      "imports": {
+        "@mistralai/mistralai": "https://esm.run/@mistralai/mistralai@3.5.0"
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: #f4f4f5;
+      color: #18181b;
+      display: flex;
+      justify-content: center;
+    }
+    .chat {
+      width: 100%;
+      max-width: 720px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      gap: 0.75rem;
+    }
+    h1 { font-size: 1.1rem; margin: 0.25rem 0; }
+    .model { font-size: 0.8rem; color: #71717a; margin: 0; }
+    .keybar { display: flex; gap: 0.5rem; }
+    .keybar input {
+      flex: 1;
+      padding: 0.5rem 0.8rem;
+      border: 1px solid #d4d4d8;
+      border-radius: 0.75rem;
+      font-size: 0.85rem;
+    }
+    .warning {
+      font-size: 0.75rem;
+      color: #b45309;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      border-radius: 0.5rem;
+      padding: 0.4rem 0.6rem;
+      margin: 0;
+    }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      background: #fff;
+      border: 1px solid #e4e4e7;
+      border-radius: 0.75rem;
+    }
+    .msg {
+      max-width: 80%;
+      padding: 0.55rem 0.8rem;
+      border-radius: 0.75rem;
+      white-space: pre-wrap;
+      line-height: 1.4;
+      font-size: 0.95rem;
+    }
+    .msg.user { align-self: flex-end; background: #ffd43b; color: #18181b; }
+    .msg.assistant { align-self: flex-start; background: #e4e4e7; }
+    .msg.error { align-self: flex-start; background: #fee2e2; color: #b91c1c; }
+    .msg.pending { align-self: flex-start; background: #e4e4e7; color: #71717a; font-style: italic; }
+    form { display: flex; gap: 0.5rem; }
+    input {
+      flex: 1;
+      padding: 0.65rem 0.8rem;
+      border: 1px solid #d4d4d8;
+      border-radius: 0.75rem;
+      font-size: 0.95rem;
+    }
+    button {
+      padding: 0.65rem 1.1rem;
+      border: none;
+      border-radius: 0.75rem;
+      background: #18181b;
+      color: #fff;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.5; cursor: default; }
+  </style>
+</head>
+<body>
+  <main class="chat">
+    <h1>Chat Mistral (archivo único)</h1>
+    <p class="model">Modelo: mistral-small-latest · SDK oficial @mistralai/mistralai vía CDN</p>
+    <div class="keybar">
+      <input id="apikey" type="password" placeholder="Tu MISTRAL_API_KEY (solo se usa en esta página)" autocomplete="off">
+    </div>
+    <p class="warning">⚠️ En modo archivo único la clave se escribe en el navegador y es visible desde las herramientas de desarrollo. Úsalo solo en local; para producción, usa la versión con servidor (<code>npm run dev</code>), que mantiene la clave en el servidor.</p>
+    <div id="messages" class="messages"></div>
+    <form id="form">
+      <input id="input" placeholder="Escribe tu mensaje…" autocomplete="off" required>
+      <button id="send" type="submit">Enviar</button>
+    </form>
+  </main>
+  <script type="module">
+    import { Mistral } from '@mistralai/mistralai';
+
+    const MODEL = 'mistral-small-latest';
+    const history = [];
+    let client = null;
+
+    const messagesEl = document.getElementById('messages');
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('send');
+    const apiKeyInput = document.getElementById('apikey');
+
+    function getClient() {
+      const key = apiKeyInput.value.trim();
+      if (!key) throw new Error('Introduce primero tu MISTRAL_API_KEY arriba.');
+      if (!client || client.apiKey !== key) client = new Mistral({ apiKey: key });
+      return client;
+    }
+
+    function extractText(content) {
+      if (typeof content === 'string') return content;
+      if (Array.isArray(content)) {
+        return content
+          .map((c) => (c && typeof c.text === 'string' ? c.text : ''))
+          .join('');
+      }
+      return '';
+    }
+
+    function addMessage(role, text) {
+      const div = document.createElement('div');
+      div.className = 'msg ' + role;
+      div.textContent = text;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return div;
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      sendBtn.disabled = true;
+      addMessage('user', text);
+      history.push({ role: 'user', content: text });
+      const pending = addMessage('pending', '…');
+      try {
+        const mistral = getClient();
+        const response = await mistral.chat.complete({ model: MODEL, messages: history });
+        const reply = extractText(response.choices?.[0]?.message?.content);
+        pending.remove();
+        addMessage('assistant', reply || '(respuesta vacía)');
+        history.push({ role: 'assistant', content: reply });
+      } catch (err) {
+        pending.remove();
+        addMessage('error', err?.message ?? 'Error desconocido');
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    });
+  </script>
+</body>
+</html>

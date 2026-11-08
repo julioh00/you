@@ -41,16 +41,23 @@ npm start
 
 Le serveur compilé tourne alors depuis `dist/` sur <http://localhost:3000> (port modifiable via la variable d'environnement `PORT`).
 
+## Version fichier unique (`app.html`)
+
+`app.html` contient toute l'app (HTML + CSS + JS + SDK officiel chargé via CDN) dans un seul fichier : ouvrez-le directement dans votre navigateur, saisissez votre `MISTRAL_API_KEY` dans le champ prévu, et discutez avec `mistral-small-latest`.
+
+⚠️ Avec un fichier HTML statique, la clé est saisie côté navigateur et donc visible depuis les outils de développement : **réservé aux tests en local**. Pour garder la clé strictement serveur, utilisez la version `npm run dev` ci-dessus.
+
 ## Structure
 
 ```
+├── app.html              # version fichier unique (tout inline, clé saisie dans la page)
 ├── package.json          # scripts + dépendances
 ├── tsconfig.json
 ├── .env.example          # modèle de fichier .env (la vraie clé va dans .env, ignoré par git)
 ├── src/
 │   └── server.ts         # serveur HTTP + endpoint POST /api/chat (appelle le SDK Mistral)
 └── public/
-    └── index.html        # interface de chat
+    └── index.html        # interface de chat (version serveur)
 ```
 
 ## Fonctionnement
